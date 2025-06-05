@@ -1,4 +1,4 @@
-module finnhub-io-websocket
+module finnhubio-ws
 
 go 1.24.3
 
