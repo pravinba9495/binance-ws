@@ -1,1 +1,1 @@
-# finnhub-io-websocket
+# finnhubio-ws
