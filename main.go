@@ -37,7 +37,7 @@ func SendToPubSub(msg WebSocketMsg, rdb PubSub) {
 }
 
 func restartService(interval time.Duration) {
-	log.Infof("Service will quit in interval: %v hr(s)", interval.Hours())
+	log.Warnf("Service will quit in interval: %v hr(s)", interval.Hours())
 	time.Sleep(interval)
 	log.Info("Restarting service ...")
 	os.Exit(1)
