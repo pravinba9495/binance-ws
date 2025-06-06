@@ -13,5 +13,6 @@ type PublishTradeData struct {
 }
 
 type WebSocketMsg struct {
-	Data TradeData `json:"data"`
+	Stream string    `json:"stream"`
+	Data   TradeData `json:"data"`
 }
