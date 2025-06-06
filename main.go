@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/charmbracelet/log"
@@ -57,7 +58,7 @@ func main() {
 
 	pubsub := NewRedisPubSub()
 
-	w, _, err := websocket.DefaultDialer.Dial(fmt.Sprintf("wss://stream.binance.com:443/stream?streams=%s@trade", os.Getenv("SYMBOL")), nil)
+	w, _, err := websocket.DefaultDialer.Dial(fmt.Sprintf("wss://stream.binance.com:443/stream?streams=%s@trade", strings.ToLower(os.Getenv("SYMBOL"))), nil)
 	if err != nil {
 		log.Fatalf("Error creating websocket connection: %v", err)
 	}
