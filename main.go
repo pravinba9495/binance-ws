@@ -4,7 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"strings"
+	"strconv"
+	"time"
 
 	"github.com/charmbracelet/log"
 
@@ -13,20 +14,33 @@ import (
 )
 
 func SendToPubSub(msg WebSocketMsg, rdb PubSub) {
-	if msg.Type == "trade" {
-		for _, data := range msg.Data {
-			bytes, err := json.Marshal(data)
-			if err != nil {
-				log.Errorf("Error marshaling message: %v", err)
-			} else {
-				log.Infof("%s", bytes)
+	price, err := strconv.ParseFloat(msg.Data.Price, 64)
+	if err != nil {
+		log.Errorf("Error parsing price: %v", err)
+		return
+	}
+	data := PublishTradeData{
+		Symbol:    msg.Data.Symbol,
+		Price:     price,
+		Timestamp: msg.Data.Timestamp,
+	}
+	bytes, err := json.Marshal(data)
+	if err != nil {
+		log.Errorf("Error marshaling message: %v", err)
+	} else {
+		log.Infof("%s", bytes)
 
-				if err := rdb.Publish("trades", bytes); err != nil {
-					log.Errorf("Error publishing trade data to Redis: %v", err.Error())
-				}
-			}
+		if err := rdb.Publish("trades", bytes); err != nil {
+			log.Errorf("Error publishing trade data to Redis: %v", err.Error())
 		}
 	}
+}
+
+func restartService(interval time.Duration) {
+	log.Infof("Service will quit in interval: %v hr(s)", interval.Hours())
+	time.Sleep(interval)
+	log.Info("Restarting service ...")
+	os.Exit(1)
 }
 
 func main() {
@@ -43,21 +57,13 @@ func main() {
 
 	pubsub := NewRedisPubSub()
 
-	w, _, err := websocket.DefaultDialer.Dial(fmt.Sprintf("wss://ws.finnhub.io?token=%s", os.Getenv("FINNHUB_API_KEY")), nil)
+	w, _, err := websocket.DefaultDialer.Dial(fmt.Sprintf("wss://stream.binance.com:443/stream?streams=%s@trade", os.Getenv("SYMBOL")), nil)
 	if err != nil {
 		log.Fatalf("Error creating websocket connection: %v", err)
 	}
 	defer w.Close()
 
-	symbols := strings.Split(os.Getenv("FINNHUB_SYMBOLS"), ",")
-	for _, s := range symbols {
-		msg, err := json.Marshal(map[string]interface{}{"type": "subscribe", "symbol": s})
-		if err != nil {
-			log.Errorf("Error marshaling message: %v", err)
-		} else {
-			w.WriteMessage(websocket.TextMessage, msg)
-		}
-	}
+	go restartService(time.Hour * 23)
 
 	var msg WebSocketMsg
 

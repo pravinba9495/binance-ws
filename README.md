@@ -1,1 +1,1 @@
-# finnhubio-ws
+# binance-ws

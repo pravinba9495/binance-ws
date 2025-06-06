@@ -1,4 +1,4 @@
-module finnhubio-ws
+module binance-ws
 
 go 1.24.3
 
