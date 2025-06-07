@@ -49,6 +49,7 @@ func restartService(interval time.Duration) {
 	log.Warnf("Service will quit in interval: %v hr(s)", interval.Hours())
 	time.Sleep(interval)
 	log.Info("Restarting service ...")
+	time.Sleep(5 * time.Second)
 	os.Exit(1)
 }
 
