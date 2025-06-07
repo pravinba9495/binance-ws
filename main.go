@@ -25,16 +25,24 @@ func SendToPubSub(msg WebSocketMsg, rdb PubSub) {
 		Price:     price,
 		Timestamp: msg.Data.Timestamp,
 	}
+
+	if err := rdb.HSet(data.Symbol, "price", fmt.Sprintf("%f", data.Price)); err != nil {
+		log.Errorf("Error setting price of %s in Redis: %v", data.Symbol, err)
+		return
+	}
+
 	bytes, err := json.Marshal(data)
 	if err != nil {
 		log.Errorf("Error marshaling message: %v", err)
-	} else {
-		log.Infof("%s", bytes)
-
-		if err := rdb.Publish("trades", bytes); err != nil {
-			log.Errorf("Error publishing trade data to Redis: %v", err.Error())
-		}
+		return
 	}
+
+	log.Infof("%s", bytes)
+
+	if err := rdb.Publish("trades", bytes); err != nil {
+		log.Errorf("Error publishing trade data to Redis: %v", err.Error())
+	}
+
 }
 
 func restartService(interval time.Duration) {

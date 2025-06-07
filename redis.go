@@ -9,6 +9,7 @@ import (
 
 type PubSub interface {
 	Publish(ch string, msg []byte) error
+	HSet(key string, field string, value string) error
 }
 
 type redisClient struct {
@@ -16,7 +17,11 @@ type redisClient struct {
 }
 
 func (rc *redisClient) Publish(ch string, msg []byte) error {
-	return rc.client.Publish(context.Background(), ch, msg).Err()
+	return rc.client.Publish(context.TODO(), ch, msg).Err()
+}
+
+func (rc *redisClient) HSet(key string, field string, value string) error {
+	return rc.client.HSet(context.TODO(), key, field, value).Err()
 }
 
 func NewRedisPubSub() PubSub {
