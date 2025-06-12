@@ -39,7 +39,7 @@ func SendToPubSub(msg WebSocketMsg, rdb PubSub) {
 
 	log.Infof("%s", bytes)
 
-	if err := rdb.Publish("trades", bytes); err != nil {
+	if err := rdb.Publish(os.Getenv("REDIS_PUBLISH_CHANNEL"), bytes); err != nil {
 		log.Errorf("Error publishing trade data to Redis: %v", err.Error())
 	}
 
